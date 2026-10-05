@@ -4,8 +4,7 @@
 #include <string>
 #include <stdexcept>
 #include <fstream>
-#include <filesystem>
-namespace fs = std::filesystem;
+#include <cstdio>
 
 std::vector<std::string> ler_arquivos_parm(const std::string& nome_arquivo) {
     std::ifstream entrada(nome_arquivo);
@@ -28,8 +27,17 @@ std::vector<std::string> ler_arquivos_parm(const std::string& nome_arquivo) {
 }
 
 bool copiar_arquivo(const std::string& origem, const std::string& destino) {
-    if (!fs::exists(origem)) {
+    std::ifstream in(origem, std::ios::binary);
+    if (!in.is_open()) {
         return false;
     }
-    return true;
+
+    std::ofstream out(destino, std::ios::binary);
+    if (!out.is_open()) {
+        return false;
+    }
+
+    out << in.rdbuf();
+
+    return in.good() && out.good();
 }
