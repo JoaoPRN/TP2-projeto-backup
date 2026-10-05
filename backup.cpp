@@ -41,3 +41,7 @@ bool copiar_arquivo(const std::string& origem, const std::string& destino) {
 
     return in.good() && out.good();
 }
+
+bool realizar_backup(const std::vector<std::string>& lista, const std::string& destino) {
+    return true;
+}

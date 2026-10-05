@@ -8,4 +8,6 @@ std::vector<std::string> ler_arquivos_parm(const std::string& nome_arquivo);
 
 bool copiar_arquivo(const std::string& origem, const std::string& destino);
 
+bool realizar_backup(const std::vector<std::string>& lista, const std::string& destino);
+
 #endif 
