@@ -57,3 +57,15 @@ TEST_CASE("Falha ao tentar copiar arquivo inexistente", "[copiar_arquivo]") {
     
     REQUIRE(resultado == false);
 }
+
+TEST_CASE("Cópia bem-sucedida de um arquivo existente", "[copiar_arquivo]") {
+    std::ofstream arquivo_teste("dados/teste.txt");
+    arquivo_teste << "12345";
+    arquivo_teste.close();
+
+    bool ok = copiar_arquivo("dados/teste.txt", "backup/teste.txt");
+    REQUIRE(ok == true);
+
+    std::ifstream f("backup/teste.txt");
+    REQUIRE(f.good());
+}
