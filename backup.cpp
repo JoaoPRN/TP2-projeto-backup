@@ -13,7 +13,9 @@ std::vector<std::string> ler_arquivos_parm(const std::string& nome_arquivo) {
     std::vector<std::string> lista;
     std::string linha;
     while (getline(entrada, linha)) {
-        if (!linha.empty()) lista.push_back(linha);
+        if (linha.empty()) continue;
+        if (linha[0] == '#') continue;
+        lista.push_back(linha);
     }
 
     if (lista.empty()) {
