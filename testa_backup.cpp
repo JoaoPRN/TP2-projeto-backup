@@ -39,3 +39,15 @@ TEST_CASE("Ler Backup.parm com caminhos válidos", "[ler_arquivos_parm]") {
     REQUIRE(lista[1] == "dados/arquivo2.txt");
     REQUIRE(lista[2] == "dados/arquivo3.txt");
 }
+
+TEST_CASE("Backup.parm com comentários e linhas vazias", "[ler_arquivos_parm]") {
+    std::ofstream parm("Backup.parm");
+    parm << "# Comentário\n";
+    parm << "\n";
+    parm << "dados/x.txt\n";
+    parm.close();
+
+    auto lista = ler_arquivos_parm("Backup.parm");
+    REQUIRE(lista.size() == 1);
+    REQUIRE(lista[0] == "dados/x.txt");
+}
