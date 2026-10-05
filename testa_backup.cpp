@@ -69,3 +69,14 @@ TEST_CASE("Cópia bem-sucedida de um arquivo existente", "[copiar_arquivo]") {
     std::ifstream f("backup/teste.txt");
     REQUIRE(f.good());
 }
+
+TEST_CASE("Conteúdo copiado corretamente", "[copiar_arquivo]") {
+    std::ofstream("dados/original.txt") << "ABCDEF";
+
+    copiar_arquivo("dados/original.txt", "backup/original.txt");
+
+    std::ifstream original("dados/original.txt"), copia("backup/original.txt");
+    std::string conteudo1((std::istreambuf_iterator<char>(original)), {});
+    std::string conteudo2((std::istreambuf_iterator<char>(copia)), {});
+    REQUIRE(conteudo1 == conteudo2);
+}
