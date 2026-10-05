@@ -6,4 +6,6 @@
 
 std::vector<std::string> ler_arquivos_parm(const std::string& nome_arquivo);
 
+std::vector<std::string> ler_arquivos_parm(const std::string& nome_arquivo);
+
 #endif 
