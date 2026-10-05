@@ -51,3 +51,8 @@ TEST_CASE("Backup.parm com comentários e linhas vazias", "[ler_arquivos_parm]")
     REQUIRE(lista.size() == 1);
     REQUIRE(lista[0] == "dados/x.txt");
 }
+
+TEST_CASE("Falha ao tentar copiar arquivo inexistente", "[copiar_arquivo]") {
+    bool resultado = copiar_arquivo("nao_existe.txt", "backup/nao_existe.txt");
+    REQUIRE(resultado == false);
+}
