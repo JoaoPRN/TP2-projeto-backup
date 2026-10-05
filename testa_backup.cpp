@@ -20,3 +20,22 @@ TEST_CASE("Erro quando arquivo de parâmetros vazio", "[ler_arquivos_parm]") {
     std::ofstream("Backup.parm").close();  // cria arquivo vazio
     REQUIRE_THROWS_AS(ler_arquivos_parm("Backup.parm"), std::runtime_error);
 }
+
+TEST_CASE("Ler Backup.parm com caminhos válidos", "[ler_arquivos_parm]") {
+    // Cria o arquivo Backup.parm no diretório atual
+    std::ofstream parm("./Backup.parm", std::ios::out);
+    REQUIRE(parm.is_open()); // garante que abriu corretamente
+    parm << "dados/arquivo1.txt\n";
+    parm << "dados/arquivo2.txt\n";
+    parm << "dados/arquivo3.txt\n";
+    parm.close(); // fecha o arquivo
+
+    // leitura
+    auto lista = ler_arquivos_parm("Backup.parm");
+
+    // Verificações
+    REQUIRE(lista.size() == 3);
+    REQUIRE(lista[0] == "dados/arquivo1.txt");
+    REQUIRE(lista[1] == "dados/arquivo2.txt");
+    REQUIRE(lista[2] == "dados/arquivo3.txt");
+}
