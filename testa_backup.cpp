@@ -80,3 +80,9 @@ TEST_CASE("Conteúdo copiado corretamente", "[copiar_arquivo]") {
     std::string conteudo2((std::istreambuf_iterator<char>(copia)), {});
     REQUIRE(conteudo1 == conteudo2);
 }
+
+TEST_CASE("Backup com lista de arquivos válida", "[realizar_backup]") {
+    std::vector<std::string> lista = {"dados/a.txt", "dados/b.txt"};
+    bool resultado = realizar_backup(lista, "backup");
+    REQUIRE(resultado == true);
+}
