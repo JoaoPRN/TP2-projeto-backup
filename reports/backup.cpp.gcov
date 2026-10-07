@@ -1,0 +1,128 @@
+        -:    0:Source:backup.cpp
+        -:    0:Graph:backup.gcno
+        -:    0:Data:backup.gcda
+        -:    0:Runs:1
+        -:    1:#include "backup.hpp"
+        -:    2:
+        -:    3:#include <vector>
+        -:    4:#include <string>
+        -:    5:#include <stdexcept>
+        -:    6:#include <fstream>
+        -:    7:#include <cstdio>
+        -:    8:#include <iostream>
+        -:    9:#include <sys/stat.h>
+        -:   10:#include <sys/types.h>
+        -:   11:#include <errno.h>
+        -:   12:#include <cassert>
+        -:   13:
+       14:   14:static bool diretorio_existe(const std::string& path) {
+        -:   15:    struct stat info;
+       14:   16:    if (stat(path.c_str(), &info) != 0) return false;
+       12:   17:    return (info.st_mode & S_IFDIR) != 0;
+        -:   18:}
+        -:   19:
+        1:   20:static bool criar_diretorios_recursivos(const std::string& path) {
+       1*:   21:    if (path.empty()) return false;
+       1*:   22:    if (diretorio_existe(path)) return true;
+        -:   23:
+        1:   24:    size_t pos = path.find_last_of('/');
+        1:   25:    if (pos != std::string::npos) {
+    #####:   26:        std::string parent = path.substr(0, pos);
+    #####:   27:        if (!parent.empty() && !diretorio_existe(parent)) {
+    #####:   28:            if (!criar_diretorios_recursivos(parent)) return false;
+        -:   29:        }
+    #####:   30:    }
+        -:   31:
+        1:   32:    if (mkdir(path.c_str(), 0755) != 0) {
+    #####:   33:        if (errno == EEXIST) return diretorio_existe(path);
+    #####:   34:        return false;
+        -:   35:    }
+        1:   36:    return true;
+        -:   37:}
+        -:   38:
+        7:   39:static std::string nome_arquivo_path(const std::string& path) {
+        7:   40:    size_t pos = path.find_last_of('/');
+       7*:   41:    if (pos == std::string::npos) return path;
+        7:   42:    return path.substr(pos + 1);
+        -:   43:}
+        -:   44:
+        5:   45:std::vector<std::string> ler_arquivos_parm(const std::string& nome_arquivo) {
+        5:   46:    std::ifstream entrada(nome_arquivo);
+        5:   47:    if (!entrada.is_open()) {
+        1:   48:        throw std::runtime_error("Erro ao abrir arquivo de parâmetros");
+        -:   49:    }
+        4:   50:    std::vector<std::string> lista;
+        4:   51:    std::string linha;
+       12:   52:    while (getline(entrada, linha)) {
+        8:   53:        if (linha.empty()) continue;
+        7:   54:        if (linha[0] == '#') continue;
+        6:   55:        lista.push_back(linha);
+        -:   56:    }
+        -:   57:
+        4:   58:    if (lista.empty()) {
+        1:   59:        throw std::runtime_error("Arquivo de parâmetros vazio");
+        -:   60:    }
+        -:   61:
+        6:   62:    return lista;
+        7:   63:}
+        -:   64:
+       10:   65:bool copiar_arquivo(const std::string& origem, const std::string& destino) {
+       10:   66:    std::ifstream in(origem, std::ios::binary);
+       10:   67:    if (!in.is_open()) {
+        2:   68:        return false;
+        -:   69:    }
+        -:   70:
+        -:   71:    // Garante que o diretório pai do destino existe (sem usar std::filesystem)
+        8:   72:    size_t pos = destino.find_last_of('/');
+        8:   73:    if (pos != std::string::npos) {
+        8:   74:        std::string parent = destino.substr(0, pos);
+        8:   75:        if (!diretorio_existe(parent)) {
+    #####:   76:            if (!criar_diretorios_recursivos(parent)) {
+    #####:   77:                return false;
+        -:   78:            }
+        -:   79:        }
+        8:   80:    }
+        -:   81:
+        8:   82:    std::ofstream out(destino, std::ios::binary);
+        8:   83:    if (!out.is_open()) {
+    #####:   84:        return false;
+        -:   85:    }
+        -:   86:
+        8:   87:    out << in.rdbuf();
+        -:   88:
+       8*:   89:    return in.good() && out.good();
+       10:   90:}
+        -:   91:
+        6:   92:bool realizar_backup(const std::vector<std::string>& files, const std::string& target_dir) {
+       6*:   93:    assert(!target_dir.empty());
+        -:   94:
+        -:   95:    // Lista vazia é considerada um erro/sem-op
+        6:   96:    if (files.empty()) {
+        1:   97:        std::cerr << "[LOG] Lista de arquivos vazia." << std::endl;
+        1:   98:        return false;
+        -:   99:    }
+        -:  100:
+        -:  101:    // Garante que o diretório destino exista (cria recursivamente se necessário)
+        5:  102:    if (!diretorio_existe(target_dir)) {
+        1:  103:        if (!criar_diretorios_recursivos(target_dir)) {
+    #####:  104:            std::cerr << "[LOG] Falha ao criar diretório de destino: " << target_dir << std::endl;
+    #####:  105:            return false;
+        -:  106:        }
+        -:  107:    }
+        -:  108:
+        5:  109:    bool all_ok = true;
+       12:  110:    for (const auto& src_path : files) {
+        7:  111:        std::cout << "[LOG] Copiando: " << src_path << std::endl;
+        -:  112:
+        -:  113:        // Extrai o nome base do caminho de origem e constrói o caminho destino
+        7:  114:        std::string basename = nome_arquivo_path(src_path);
+        7:  115:        std::string dst_path = target_dir + "/" + basename;
+        -:  116:
+        7:  117:        if (!copiar_arquivo(src_path, dst_path)) {
+        1:  118:            std::cerr << "Erro ao copiar: " << src_path << std::endl;
+        1:  119:            all_ok = false; // marca falha, mas continua tentando os demais arquivos
+        -:  120:        }
+        7:  121:    }
+        -:  122:
+        5:  123:    return all_ok;
+        -:  124:} 
