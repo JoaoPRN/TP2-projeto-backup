@@ -68,6 +68,17 @@ bool copiar_arquivo(const std::string& origem, const std::string& destino) {
         return false;
     }
 
+    // Garante que o diretório pai do destino existe (sem usar std::filesystem)
+    size_t pos = destino.find_last_of('/');
+    if (pos != std::string::npos) {
+        std::string parent = destino.substr(0, pos);
+        if (!diretorio_existe(parent)) {
+            if (!criar_diretorios_recursivos(parent)) {
+                return false;
+            }
+        }
+    }
+
     std::ofstream out(destino, std::ios::binary);
     if (!out.is_open()) {
         return false;
