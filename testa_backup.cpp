@@ -2,6 +2,7 @@
 #include "catch_amalgamated.hpp"
 #include "backup.hpp"
 #include <fstream>
+#include <filesystem>
 
 TEST_CASE("Primeiro teste - ambiente configurado", "[init]") {
     REQUIRE(1 == 1);
@@ -127,4 +128,13 @@ TEST_CASE("realizar_backup retorna falso para lista vazia", "[realizar_backup]")
     std::vector<std::string> lista;
     bool resultado = realizar_backup(lista, "backup");
     REQUIRE(resultado == false);
+}
+
+TEST_CASE("realizar_backup cria diretório de destino se não existir", "[realizar_backup]") {
+    std::filesystem::remove_all("backup_auto");
+    std::vector<std::string> lista = {"dados/a.txt"};
+    std::ofstream("dados/a.txt") << "teste";
+    bool ok = realizar_backup(lista, "backup_auto");
+    REQUIRE(ok == true);
+    REQUIRE(std::filesystem::exists("backup_auto/a.txt"));
 }
