@@ -122,3 +122,9 @@ TEST_CASE("Integração completa: leitura do arquivo .parm e backup total", "[in
     REQUIRE(fa.good());
     REQUIRE(fb.good());
 }
+
+TEST_CASE("realizar_backup retorna falso para lista vazia", "[realizar_backup]") {
+    std::vector<std::string> lista;
+    bool resultado = realizar_backup(lista, "backup");
+    REQUIRE(resultado == false);
+}
