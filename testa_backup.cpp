@@ -101,3 +101,24 @@ TEST_CASE("Backup falha se algum arquivo não existir", "[realizar_backup]") {
     bool ok = realizar_backup(lista, "backup");
     REQUIRE(ok == false);
 }
+
+TEST_CASE("Integração completa: leitura do arquivo .parm e backup total", "[integracao]") {
+    // Cria o arquivo de parâmetros
+    std::ofstream parm("Backup.parm");
+    parm << "dados/a.txt\n";
+    parm << "dados/b.txt\n";
+    parm.close();
+
+    // Cria os arquivos originais
+    std::ofstream("dados/a.txt") << "AAA";
+    std::ofstream("dados/b.txt") << "BBB";
+
+    auto lista = ler_arquivos_parm("Backup.parm");
+    bool ok = realizar_backup(lista, "backup");
+
+    REQUIRE(ok == true);
+    std::ifstream fa("backup/a.txt");
+    std::ifstream fb("backup/b.txt");
+    REQUIRE(fa.good());
+    REQUIRE(fb.good());
+}
