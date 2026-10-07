@@ -82,7 +82,22 @@ TEST_CASE("Conteúdo copiado corretamente", "[copiar_arquivo]") {
 }
 
 TEST_CASE("Backup com lista de arquivos válida", "[realizar_backup]") {
+    // prepara ambiente de teste
+    system("mkdir -p dados backup");
+    std::ofstream("dados/a.txt") << "A";
+    std::ofstream("dados/b.txt") << "B";
+
     std::vector<std::string> lista = {"dados/a.txt", "dados/b.txt"};
     bool resultado = realizar_backup(lista, "backup");
     REQUIRE(resultado == true);
+
+    // limpeza
+    system("rm -f dados/a.txt dados/b.txt backup/a.txt backup/b.txt");
+}
+
+
+TEST_CASE("Backup falha se algum arquivo não existir", "[realizar_backup]") {
+    std::vector<std::string> lista = {"dados/nao_existe.txt"};
+    bool ok = realizar_backup(lista, "backup");
+    REQUIRE(ok == false);
 }
