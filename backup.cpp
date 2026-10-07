@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <errno.h>
+#include <cassert>
 
 static bool diretorio_existe(const std::string& path) {
     struct stat info;
@@ -77,21 +78,36 @@ bool copiar_arquivo(const std::string& origem, const std::string& destino) {
     return in.good() && out.good();
 }
 
-bool realizar_backup(const std::vector<std::string>& lista, const std::string& destino) {
-    if (lista.empty()) return false;
+bool realizar_backup(const std::vector<std::string>& files, const std::string& target_dir) {
+    assert(!target_dir.empty());
 
-    if (!diretorio_existe(destino)) {
-        if (!criar_diretorios_recursivos(destino)) return false;
+    // Lista vazia é considerada um erro/sem-op
+    if (files.empty()) {
+        std::cerr << "[LOG] Lista de arquivos vazia." << std::endl;
+        return false;
     }
 
-    bool sucesso = true;
-    for (auto& arquivo : lista) {
-    std::string nome = nome_arquivo_path(arquivo);
-    std::string destino_final = destino + "/" + nome;
-        if (!copiar_arquivo(arquivo, destino_final)) {
-            std::cerr << "Erro ao copiar: " << arquivo << std::endl;
-            sucesso = false;
+    // Garante que o diretório destino exista (cria recursivamente se necessário)
+    if (!diretorio_existe(target_dir)) {
+        if (!criar_diretorios_recursivos(target_dir)) {
+            std::cerr << "[LOG] Falha ao criar diretório de destino: " << target_dir << std::endl;
+            return false;
         }
     }
-    return sucesso;
-}
+
+    bool all_ok = true;
+    for (const auto& src_path : files) {
+        std::cout << "[LOG] Copiando: " << src_path << std::endl;
+
+        // Extrai o nome base do caminho de origem e constrói o caminho destino
+        std::string basename = nome_arquivo_path(src_path);
+        std::string dst_path = target_dir + "/" + basename;
+
+        if (!copiar_arquivo(src_path, dst_path)) {
+            std::cerr << "Erro ao copiar: " << src_path << std::endl;
+            all_ok = false; // marca falha, mas continua tentando os demais arquivos
+        }
+    }
+
+    return all_ok;
+} 

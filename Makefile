@@ -1,6 +1,6 @@
 # Compilador e flags
 CXX = g++
-CXXFLAGS = -std=c++14 -Wall -Wextra -O0
+CXXFLAGS = -std=c++17 -Wall -Wextra -O0
 COVFLAGS = -fprofile-arcs -ftest-coverage
 DBGFLAGS = -g
 LDFLAGS = -lgcov
