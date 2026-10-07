@@ -138,3 +138,17 @@ TEST_CASE("realizar_backup cria diretório de destino se não existir", "[realiz
     REQUIRE(ok == true);
     REQUIRE(std::filesystem::exists("backup_auto/a.txt"));
 }
+
+TEST_CASE("realizar_backup sobrescreve arquivos existentes", "[realizar_backup]") {
+    std::ofstream("dados/a.txt") << "original";
+    std::ofstream("backup/a.txt") << "antigo";
+    std::vector<std::string> lista = {"dados/a.txt"};
+
+    bool ok = realizar_backup(lista, "backup");
+    REQUIRE(ok == true);
+
+    std::ifstream in("backup/a.txt");
+    std::string conteudo;
+    std::getline(in, conteudo);
+    REQUIRE(conteudo == "original");
+}
